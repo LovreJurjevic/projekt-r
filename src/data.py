@@ -37,7 +37,7 @@ def extract_data():
 
         #u jsonu se nalaze krivi nazivi slika pa je potrebno ispraviti
         paths.append(PATH_TO_IMAGES_FOLDER + "/" + file_name.replace(":","_"))
-        labels.append(annotation["category_id"])
+        labels.append(annotation["category_id"]-1)
         #labels_for_subclasses.append(annotation["category"])
 
     print("Size of paths and labels should be the same: ", len(paths), len(labels), len(labels_for_subclasses))

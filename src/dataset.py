@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow import keras
 from keras import layers
 from sklearn.model_selection import train_test_split
-import data
+from src import data
 
 data_augmentation = tf.keras.Sequential([
         layers.RandomFlip("horizontal"),
@@ -15,7 +15,7 @@ def load_and_preprocess_image(path, label):
     img = tf.io.read_file(path)
     img = tf.image.decode_jpeg(img, channels=3)
     #img = tf.image.rgb_to_grayscale(img)
-    img = tf.image.resize(img, (512,512))
+    img = tf.image.resize(img, (64,64))
     img = tf.cast(img, tf.float32) / 255.0
     return img, label
 
@@ -28,7 +28,7 @@ def create_dataset(paths, labels, is_for_training = False):
             lambda x, y: (data_augmentation(x, training=True), y),
             num_parallel_calls=tf.data.AUTOTUNE
         )
-    ds = ds.batch(32).prefetch(tf.data.AUTOTUNE)
+    ds = ds.batch(16).prefetch(tf.data.AUTOTUNE)
     return ds
 
 
