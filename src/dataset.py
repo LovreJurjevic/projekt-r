@@ -11,28 +11,28 @@ data_augmentation = tf.keras.Sequential([
         layers.RandomZoom(0.2),
     ])
 
-def load_and_preprocess_image(path, label):
+def load_and_preprocess_image(path, label,image_height,image_width):
     img = tf.io.read_file(path)
     img = tf.image.decode_jpeg(img, channels=3)
     #img = tf.image.rgb_to_grayscale(img)
-    img = tf.image.resize(img, (64,64))
+    img = tf.image.resize(img, (image_height,image_width))
     img = tf.cast(img, tf.float32) / 255.0
     return img, label
 
-def create_dataset(paths, labels, is_for_training = False):
+def create_dataset(paths, labels,  image_height, image_width, batch_size, is_for_training = False):
     ds = tf.data.Dataset.from_tensor_slices((paths, labels))
-    ds = ds.map(load_and_preprocess_image, num_parallel_calls=tf.data.AUTOTUNE)
+    ds = ds.map(lambda x: load_and_preprocess_image(x, image_height, image_width), num_parallel_calls=tf.data.AUTOTUNE)
     if is_for_training:
         ds = ds.shuffle(buffer_size=1000)
         ds = ds.map(
             lambda x, y: (data_augmentation(x, training=True), y),
             num_parallel_calls=tf.data.AUTOTUNE
         )
-    ds = ds.batch(16).prefetch(tf.data.AUTOTUNE)
+    ds = ds.batch(batch_size).prefetch(tf.data.AUTOTUNE)
     return ds
 
 
-def create_datasets():
+def create_datasets(image_height, image_width, batch_size):
     paths, labels = data.extract_data()
 
     train_val_paths, test_paths, train_val_labels, test_labels = train_test_split(
