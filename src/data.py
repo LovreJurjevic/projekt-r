@@ -29,7 +29,7 @@ def extract_data():
 
         file_name = ""
 
-        #sram me ove petlje, vjerovatno se moze nekako aproksimirat uz pomoc image_id-a
+        # Vjerovatno se moze nekako aproksimirat uz pomoc image_id-a
         for image in images:
             if str(image["id"]) == str(image_id):
                 file_name = image["file_name"]
