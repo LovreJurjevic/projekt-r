@@ -1,6 +1,9 @@
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from src import data
+import numpy as np
+from sklearn.utils.class_weight import compute_class_weight
+
 
 def load_and_preprocess_image(path, label, image_height, image_width):
     img = tf.io.read_file(path)
@@ -63,4 +66,15 @@ def create_datasets(image_height, image_width, batch_size):
     val_ds = create_dataset(val_paths, val_labels, image_height, image_width, batch_size)
     test_ds = create_dataset(test_paths, test_labels, image_height, image_width, batch_size)
 
-    return train_ds, val_ds, test_ds
+    class_weights = compute_class_weight(
+    class_weight="balanced",
+    classes=np.unique(train_labels),
+    y=train_labels
+    )
+
+    class_weight_dict = {
+        int(cls): weight
+        for cls, weight in zip(np.unique(train_labels), class_weights)
+    }
+
+    return train_ds, val_ds, test_ds, class_weight_dict

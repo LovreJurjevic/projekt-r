@@ -1,4 +1,5 @@
 venv/
 fastener_dataset/
 **/__pycache__/
-models/
+models/01/
+models/02/
