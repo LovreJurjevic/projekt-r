@@ -1,0 +1,7 @@
+datumaro==1.12.0
+keras==3.11.3
+matplotlib==3.10.8
+numpy==2.4.1
+opencv_python==4.7.0.72
+scikit_learn==1.8.0
+tensorflow_rocm==2.17.1
