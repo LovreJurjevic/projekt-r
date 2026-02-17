@@ -1,9 +1,13 @@
+import keras.models
 import tensorflow as tf
+from keras.src.applications.efficientnet import block
 from sklearn.model_selection import train_test_split
-from src import data
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+import data
 import numpy as np
 from sklearn.utils.class_weight import compute_class_weight
-
 
 def load_and_preprocess_image(path, label, image_height, image_width):
     img = tf.io.read_file(path)
@@ -76,3 +80,47 @@ def create_datasets(image_height, image_width, batch_size):
     }
 
     return train_ds, val_ds, test_ds, class_weight_dict
+
+
+train_ds, lav_ds, test_ds, class_weight_dict = create_datasets(256, 256, 32)
+
+print(test_ds)
+
+milicevicev_model = tf.keras.models.load_model("milicevicev_model.keras")
+nas_jednostavni_model = tf.keras.models.load_model("nas_model.keras")
+resnet_model = tf.keras.models.load_model("resnet_model.keras")
+l = ["Miličevićev model", "Naš jednostavan model", "ResNet model"]
+
+modeli = [milicevicev_model, nas_jednostavni_model, resnet_model]
+
+for model in modeli:
+    y_prob = model.predict(test_ds, verbose=1)
+    # After y_prob = milicevicev_model.predict(test_ds, verbose=1)
+    y_pred = tf.argmax(y_prob, axis=1).numpy()  # NumPy array, shape (3394)
+
+    # Extract ALL true labels from test_ds
+    y_true = []
+    for _, labels_batch in test_ds:
+        y_true.extend(labels_batch.numpy().flatten())
+    y_true = np.array(y_true)  # shape (3394,)
+
+    # Now shapes match!
+    y_true_tf = tf.convert_to_tensor(y_true, dtype=tf.int32)
+    y_pred_tf = tf.convert_to_tensor(y_pred, dtype=tf.int32)
+
+    cm = tf.math.confusion_matrix(labels=y_true_tf, predictions=y_pred_tf, num_classes=6)
+    cm_np = cm.numpy()
+    print("Confusion Matrix:\n", cm.numpy())
+
+    cm_normalized = cm_np.astype('float') / cm_np.sum(axis=1)[:, np.newaxis]
+    # Plot heatmap
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(cm_normalized, annot=True, fmt='.1%', cmap='Blues',
+                xticklabels=range(6), yticklabels=range(6),
+                cbar_kws={'label': 'Postotak točnosti'})
+    plt.xlabel('Predviđena kategorija')
+    plt.ylabel('Prava kategorija')
+    plt.title('Matrica konfuzije za ' + l[modeli.index(model)])
+    plt.tight_layout()
+    plt.show(block=False)
+plt.show()
