@@ -95,16 +95,14 @@ modeli = [milicevicev_model, nas_jednostavni_model, resnet_model]
 
 for model in modeli:
     y_prob = model.predict(test_ds, verbose=1)
-    # After y_prob = milicevicev_model.predict(test_ds, verbose=1)
-    y_pred = tf.argmax(y_prob, axis=1).numpy()  # NumPy array, shape (3394)
 
-    # Extract ALL true labels from test_ds
+    y_pred = tf.argmax(y_prob, axis=1).numpy()
+
     y_true = []
     for _, labels_batch in test_ds:
         y_true.extend(labels_batch.numpy().flatten())
-    y_true = np.array(y_true)  # shape (3394,)
+    y_true = np.array(y_true)
 
-    # Now shapes match!
     y_true_tf = tf.convert_to_tensor(y_true, dtype=tf.int32)
     y_pred_tf = tf.convert_to_tensor(y_pred, dtype=tf.int32)
 
@@ -113,7 +111,7 @@ for model in modeli:
     print("Confusion Matrix:\n", cm.numpy())
 
     cm_normalized = cm_np.astype('float') / cm_np.sum(axis=1)[:, np.newaxis]
-    # Plot heatmap
+
     plt.figure(figsize=(8, 6))
     sns.heatmap(cm_normalized, annot=True, fmt='.1%', cmap='Blues',
                 xticklabels=range(6), yticklabels=range(6),
